@@ -41,7 +41,12 @@ int find_symbol_from_table(char* name);
 %}
 
 %%
+
 bucol : START LINE_TERMINATOR declaration_section MAIN LINE_TERMINATOR main_section END LINE_TERMINATOR
+      {
+            printf("Parsing complete\n");
+            exit(0);
+      }
       ;
 
 declaration_section : declaration_statement

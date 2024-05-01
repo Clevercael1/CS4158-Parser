@@ -1,4 +1,3 @@
-
 %token LINE_TERMINATOR STRING_LITERAL START MAIN END MOVE ADD INPUT PRINT TO SEMICOLON
 %token <sval> INTEGER_TYPE
 %token <sval> FLOAT_TYPE
@@ -17,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include "project.tab.h"
 
 extern FILE* yyin;
 extern int yylineno;
@@ -40,36 +40,9 @@ int find_symbol_from_table(char* name);
 
 %}
 
-/*
-
-The parser should report when it has been presented with a well-formed/not-well-formed program. 
-It should also flag an error if the program attempts to assign a value to a variable that is not declared, 
-or assign a value to a variable which is bigger than its declared capacity. For example, using the program above, 
-if a program tried to ‘MOVE 500000 TO Y’ a warning flag should be raised (as Y is only declared as ‘SSSS’). 
-For top marks the parser should detect if you try to put a float value (ADD or MOVE) into an integer. 
-For example, in the correct code above, if we tried to move Z (or 50.3) to -Y. 
-
-invalid needed as a token?
-need to update lines 88 onwards.
-need to change methods around
-input statement needs to take 3 identifiers
-
-start
-declare int 
-declare float
-
-main
-print 
-add 
-move 
-input 
-end 
-
-
-*/
-
 %%
 bucol : START LINE_TERMINATOR declaration_section MAIN LINE_TERMINATOR main_section END LINE_TERMINATOR
+      ;
 
 declaration_section : declaration_statement
                     | declaration_section declaration_statement 
@@ -89,8 +62,7 @@ main_statement : move_assignment_statement
                | print_statement
                ;
 
-
-move_assignment_statement : MOVE IDENTIFIER TO IDENTIFIER LINE_TERMINAL { 
+move_assignment_statement : MOVE IDENTIFIER TO IDENTIFIER LINE_TERMINATOR { 
                                                                     int index_one = find_symbol_from_table($2);
                                                                     if (index_one == -1) {
                                                                         char str[100];
@@ -112,7 +84,7 @@ move_assignment_statement : MOVE IDENTIFIER TO IDENTIFIER LINE_TERMINAL {
                                                                     }
                                                                     symbol_table[index_two].value = (int)$2;                                                                     
                                                                 }
-                          | MOVE INTEGER TO IDENTIFIER LINE_TERMINAL { 
+                          | MOVE INTEGER TO IDENTIFIER LINE_TERMINATOR { 
                                                                 int index = find_symbol_from_table($4);
                                                                 if (index == -1) {
                                                                     char str[100];
@@ -133,7 +105,7 @@ move_assignment_statement : MOVE IDENTIFIER TO IDENTIFIER LINE_TERMINAL {
                                                                 }
                                                                 symbol_table[index].value = $2; 
                                                             }
-                          | MOVE FLOAT TO IDENTIFIER LINE_TERMINAL { 
+                          | MOVE FLOAT TO IDENTIFIER LINE_TERMINATOR { 
                                                                 int index = find_symbol_from_table($4);
                                                                 if (index == -1) {
                                                                     char str[100];
@@ -156,7 +128,7 @@ move_assignment_statement : MOVE IDENTIFIER TO IDENTIFIER LINE_TERMINAL {
                                                             }
                           ;
 
-add_assignment_statement : ADD INTEGER TO IDENTIFIER LINE_TERMINAL { 
+add_assignment_statement : ADD INTEGER TO IDENTIFIER LINE_TERMINATOR { 
                                                                     int index = find_symbol_from_table($4);
                                                                     if (index == -1) {
                                                                         char str[100];
@@ -177,7 +149,7 @@ add_assignment_statement : ADD INTEGER TO IDENTIFIER LINE_TERMINAL {
                                                                     }
                                                                     symbol_table[index].value = $2 + val;
                                                                 }
-                         | ADD IDENTIFIER TO IDENTIFIER LINE_TERMINAL { 
+                         | ADD IDENTIFIER TO IDENTIFIER LINE_TERMINATOR { 
                                                                     int index_one = find_symbol_from_table($2);
                                                                     if (index_one == -1) {
                                                                         char str[100];
@@ -207,7 +179,7 @@ add_assignment_statement : ADD INTEGER TO IDENTIFIER LINE_TERMINAL {
                                                                     }
                                                                     symbol_table[index_two].value = val1 + val2;
                                                                 }
-                         | : ADD FLOAT TO IDENTIFIER LINE_TERMINAL { 
+                         | ADD FLOAT TO IDENTIFIER LINE_TERMINATOR { 
                                                                     int index = find_symbol_from_table($4);
                                                                     if (index == -1) {
                                                                         char str[100];
@@ -229,7 +201,7 @@ add_assignment_statement : ADD INTEGER TO IDENTIFIER LINE_TERMINAL {
                                                                     symbol_table[index].value = $2 + val;
                                                                 }
                          ;
-input_assignment_statement : INPUT IDENTIFIER LINE_TERMINAL {
+input_assignment_statement : INPUT IDENTIFIER LINE_TERMINATOR {
                                                         int index_one = find_symbol_from_table($2);
                                                         if (index_one == -1) {
                                                             char str[100];
@@ -237,7 +209,7 @@ input_assignment_statement : INPUT IDENTIFIER LINE_TERMINAL {
                                                             yyerror(str);
                                                         }
                                                   }
-                           | INPUT identifier_list IDENTIFIER LINE_TERMINAL {
+                           | INPUT identifier_list IDENTIFIER LINE_TERMINATOR {
                                                                         int index_one = find_symbol_from_table($3);
                                                                         if (index_one == -1) {
                                                                             char str[100];
@@ -247,7 +219,7 @@ input_assignment_statement : INPUT IDENTIFIER LINE_TERMINAL {
                                                                    }
                            ;
 
-identifier_list : IDENTIFIER SEMI_COLON {
+identifier_list : IDENTIFIER SEMICOLON {
                                             int index_one = find_symbol_from_table($1);
                                             if (index_one == -1) {
                                                 char str[100];
@@ -255,7 +227,7 @@ identifier_list : IDENTIFIER SEMI_COLON {
                                                 yyerror(str);
                                             }
                                         }
-                | identifier_list IDENTIFIER SEMI_COLON {
+                | identifier_list IDENTIFIER SEMICOLON {
                                                             int index_one = find_symbol_from_table($2);
                                                             if (index_one == -1) {
                                                                 char str[100];
@@ -265,13 +237,13 @@ identifier_list : IDENTIFIER SEMI_COLON {
                                                         }
                 ;
 
-print_statement : PRINT print_element LINE_TERMINAL
+print_statement : PRINT print_element LINE_TERMINATOR
                  | PRINT print_list
                  ;
 
-print_list : print_element SEMI_COLON
-           | print_list print_element SEMI_COLON
-           | print_list print_element LINE_TERMINAL
+print_list : print_element SEMICOLON
+           | print_list print_element SEMICOLON
+           | print_list print_element LINE_TERMINATOR
            ;
 
 print_element : STRING_LITERAL
@@ -285,20 +257,6 @@ print_element : STRING_LITERAL
                             }
               ;
 %%
-/*
-extern FILE *yyin;
-
-main()
-{
-do yyparse();
-while(!feof(yyin));
-}
-
-yyerror(char *s)
-{
-fprintf(stderr, "%s\n", s);
-}
-*/
 
 void add_symbol_to_table(char* name, char* size) {
     int index = find_symbol_from_table(name);

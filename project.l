@@ -26,10 +26,12 @@
 %}
 
 %option caseless
+%option yylineno
 
 %%
 
 [\t ]+ /* ignore whitespace */ ;
+[[:space:]] {}
 "START"                                                     {printf("current %s is a valid KEYWORD\n", yytext); return(START);}
 "MAIN"                                                      {printf("current %s is a valid KEYWORD\n", yytext); return(MAIN);}
 "END"                                                       {printf("current %s is a valid KEYWORD\n", yytext); return(END);}
@@ -51,6 +53,7 @@ s+                                                          {printf("current %s 
 
 %%
 
+/*
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         fprintf(stderr, "Usage: %s input_file\n", argv[0]);
@@ -74,7 +77,7 @@ while ((token = yylex()) != 0) {
 
     return 0;
 }
-
+*/
 
 int yywrap() {
     return(1); 

@@ -2,12 +2,11 @@ START.
 SSS XY-1.
 SSSS -Y.
 SSS.S Z.
-SSS.SS 94K.
+SSS.SS K9.
 
 MAIN.
 PRINT "Please enter a number? ".
 INPUT -Y.
-
 MOVE 15.5 TO -Y.
 ADD -Y TO Z.
 PRINT XY-1;" + ";-Y;"=";Z.

@@ -1,1 +1,8 @@
 tryToGetWorking.y
+lex.yy.c
+lex.yy.o
+project.dot
+project.tab.c
+project.tab.h
+project.tab.o
+executable.exe

@@ -1,0 +1,11 @@
+To run enter the following bash commands:
+
+flex project.l 
+gcc -o lexer lex.yy.c
+.\lexer filename 
+
+I have included an example.in file in my submission (That contains a valid example). Feel free to use the below bash command to test my lexer.
+
+./lexer example.in
+
+example.in is completely valid, except for one variable named 94K, when run the lexer announces this variable as being Invalid.

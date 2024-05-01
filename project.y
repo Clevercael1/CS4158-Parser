@@ -1,15 +1,3 @@
-%token LINE_TERMINATOR STRING_LITERAL START MAIN END MOVE ADD INPUT PRINT TO SEMICOLON
-%token <sval> INTEGER_TYPE
-%token <sval> FLOAT_TYPE
-%token <sval> IDENTIFIER
-%token <ival> INTEGER
-%token <fval> FLOAT
-
-%union {
-    int ival;
-    char *sval;
-    float fval;
-}
 
 %{
 #include <stdio.h>
@@ -39,6 +27,19 @@ void add_symbol_to_table(char* name, char* size);
 int find_symbol_from_table(char* name);
 
 %}
+
+%union {
+    int ival;
+    char *sval;
+    float fval;
+}
+
+%token LINE_TERMINATOR STRING_LITERAL START MAIN END MOVE ADD INPUT PRINT TO SEMICOLON
+%token <sval> INTEGER_TYPE
+%token <sval> FLOAT_TYPE
+%token <sval> IDENTIFIER
+%token <ival> INTEGER
+%token <fval> FLOAT
 
 %%
 

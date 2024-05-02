@@ -14,6 +14,7 @@ struct symbol {
     char name[100];
     int value;
     int size;
+    char type[20];
 };
 
 struct symbol symbol_table[MAX_SYMBOLS_SIZE];
@@ -21,6 +22,7 @@ int num_symbols = 0;
 void yyerror(const char *msg);
 void add_symbol_to_table(char* name, char* size);
 int find_symbol_from_table(char* name);
+bool containsDot(const char *str);
 
 %}
 
@@ -75,6 +77,15 @@ move_assignment_statement: MOVE IDENTIFIER TO IDENTIFIER LINE_TERMINATOR {
                                                                         yyerror(str);
                                                                     }
 
+                                                                    const char* type_one = symbol_table[index_one].type;
+                                                                    const char* type_two = symbol_table[index_two].type;
+
+                                                                    if ((containsDot(type_one) && !containsDot(type_two)) || (!containsDot(type_one) && containsDot(type_two))) {
+                                                                    char str[100];
+                                                                    sprintf(str, "Type mismatch: Cannot assign %s to %s", type_one, type_two);
+                                                                    yyerror(str);
+                                                                    }
+
                                                                     if (symbol_table[index_one].size > symbol_table[index_two].size){
                                                                         char str[100];
                                                                         sprintf(str, "%s is larger than the capacity of %s", $2, $4);
@@ -89,12 +100,22 @@ move_assignment_statement: MOVE IDENTIFIER TO IDENTIFIER LINE_TERMINATOR {
                                                                     sprintf(str, "Undeclared variable: %s", $4);
                                                                     yyerror(str);
                                                                 }
+
+                                                                const char* dest_type = symbol_table[index].type;
+
+                                                                if (containsDot(dest_type)) {
+                                                                char str[100];
+                                                                sprintf(str, "Type mismatch: Cannot assign integer to %s", $4);
+                                                                yyerror(str);
+                                                                }
+
                                                                 int val = $2;
                                                                 int num_digits = 0;
                                                                 while (val != 0) {
                                                                     val /= 10;
                                                                     num_digits++;
                                                                 }
+
 
                                                                 if (num_digits > symbol_table[index].size){
                                                                     char str[100];
@@ -110,6 +131,15 @@ move_assignment_statement: MOVE IDENTIFIER TO IDENTIFIER LINE_TERMINATOR {
                                                                     sprintf(str, "Undeclared variable: %s", $4);
                                                                     yyerror(str);
                                                                 }
+
+                                                                const char* dest_type = symbol_table[index].type;
+
+                                                                if (!containsDot(dest_type)) {
+                                                                char str[100];
+                                                                sprintf(str, "Type mismatch: Cannot assign float to %s", $4);
+                                                                yyerror(str);
+                                                                }
+
                                                                 int val = $2;
                                                                 int num_digits = 0;
                                                                 while (val != 0) {
@@ -133,6 +163,16 @@ add_assignment_statement: ADD INTEGER TO IDENTIFIER LINE_TERMINATOR {
                                                                         sprintf(str, "Undeclared variable: %s", $4);
                                                                         yyerror(str);
                                                                     }
+
+                                                                    
+                                                                    const char* dest_type = symbol_table[index].type;
+
+                                                                    if (containsDot(dest_type)) {
+                                                                    char str[100];
+                                                                    sprintf(str, "Type mismatch: Cannot add integer to %s", $4);
+                                                                    yyerror(str);
+                                                                    }
+
                                                                     int val = symbol_table[index].value;
                                                                     int new_val = $2 + val;
                                                                     int num_digits = 0;
@@ -142,7 +182,7 @@ add_assignment_statement: ADD INTEGER TO IDENTIFIER LINE_TERMINATOR {
                                                                     }
                                                                     if (num_digits > symbol_table[index].size){
                                                                         char str[100];
-                                                                        sprintf(str, "The summation is larger than the capacity of: %s", $4);
+                                                                        sprintf(str, "The sum is larger than the capacity of: %s", $4);
                                                                         yyerror(str);
                                                                     }
                                                                     symbol_table[index].value = $2 + val;
@@ -162,6 +202,16 @@ add_assignment_statement: ADD INTEGER TO IDENTIFIER LINE_TERMINATOR {
                                                                         yyerror(str);
                                                                     }
 
+                                                                    
+                                                                    const char* type_one = symbol_table[index_one].type;
+                                                                    const char* type_two = symbol_table[index_two].type;
+
+                                                                    if ((containsDot(type_one) && !containsDot(type_two)) || (!containsDot(type_one) && containsDot(type_two))) {
+                                                                    char str[100];
+                                                                    sprintf(str, "Type mismatch: Cannot add %s to %s", type_one, type_two);
+                                                                    yyerror(str);
+                                                                    }
+
                                                                     int val2 = symbol_table[index_two].value;
                                                                     int val1 = symbol_table[index_one].value;
                                                                     int newVal = val1 + val2;
@@ -172,7 +222,7 @@ add_assignment_statement: ADD INTEGER TO IDENTIFIER LINE_TERMINATOR {
                                                                     }
                                                                     if (num_digits > symbol_table[index_two].size){
                                                                         char str[100];
-                                                                        sprintf(str, "the summation is larger than the capacity of: %s", $4);
+                                                                        sprintf(str, "the sum is larger than the capacity of: %s", $4);
                                                                         yyerror(str);
                                                                     }
                                                                     symbol_table[index_two].value = val1 + val2;
@@ -184,6 +234,16 @@ add_assignment_statement: ADD INTEGER TO IDENTIFIER LINE_TERMINATOR {
                                                                         sprintf(str, "Undeclared variable: %s", $4);
                                                                         yyerror(str);
                                                                     }
+
+
+                                                                    const char* dest_type = symbol_table[index].type;
+
+                                                                    if (!containsDot(dest_type)) {
+                                                                    char str[100];
+                                                                    sprintf(str, "Type mismatch: Cannot add float to %s", $4);
+                                                                    yyerror(str);
+                                                                    }
+
                                                                     int val = symbol_table[index].value;
                                                                     int new_val = $2 + val;
                                                                     int num_digits = 0;
@@ -193,7 +253,7 @@ add_assignment_statement: ADD INTEGER TO IDENTIFIER LINE_TERMINATOR {
                                                                     }
                                                                     if (num_digits > symbol_table[index].size){
                                                                         char str[100];
-                                                                        sprintf(str, "The summation is larger than the capacity of: %s", $4);
+                                                                        sprintf(str, "The sum is larger than the capacity of: %s", $4);
                                                                         yyerror(str);
                                                                     }
                                                                     symbol_table[index].value = $2 + val;
@@ -263,6 +323,7 @@ void add_symbol_to_table(char* name, char* size) {
         strcpy(symbol_table[num_symbols].name, name);
         symbol_table[num_symbols].value = 0;
         symbol_table[num_symbols].size =strlen(size);
+        strcpy(symbol_table[num_symbols].type, size);
         num_symbols++;
     }
 }
@@ -281,6 +342,10 @@ void yyerror(const char *msg) {
     printf("Invalid BUCOL Code!\n");
     fprintf(stderr, "Line %d: %s\n", yylineno, msg);
     exit(1);
+}
+
+bool containsDot(const char *str) {
+    return (strstr(str, ".") != NULL);
 }
 
 int main(int argc, char** argv) {

@@ -2,12 +2,15 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
+#include <stdbool.h>
+#include "project.tab.h"
 
-extern int yylex();
+extern FILE* yyin;
 extern int yylineno;
-extern FILE *yyin; 
+
+int yylex();
+void yyerror(const char *msg);
 
 #define MAX_SYMBOLS_SIZE 100000
 
@@ -19,11 +22,13 @@ struct symbol {
 
 struct symbol symbol_table[MAX_SYMBOLS_SIZE];
 int num_symbols = 0;
-void yyerror(const char *msg);
+
 void add_symbol_to_table(char* name, char* size);
 int find_symbol_from_table(char* name);
 
 %}
+
+%locations
 
 %union {
     int ival;
@@ -31,7 +36,7 @@ int find_symbol_from_table(char* name);
     float fval;
 }
 
-%token STRING_LITERAL START LINE_TERMINATOR MAIN END MOVE ADD INPUT PRINT TO SEMICOLON
+%token LINE_TERMINATOR STRING_LITERAL START MAIN END MOVE ADD INPUT PRINT TO SEMICOLON
 %token <sval> INTEGER_TYPE
 %token <sval> FLOAT_TYPE
 %token <sval> IDENTIFIER
@@ -40,33 +45,32 @@ int find_symbol_from_table(char* name);
 
 %%
 
-bucol: START LINE_TERMINATOR
+bucol : START LINE_TERMINATOR declaration_section MAIN LINE_TERMINATOR main_section END LINE_TERMINATOR
       {
             printf("Parsing complete\n");
-            //declaration_section MAIN LINE_TERMINATOR main_section END LINE_TERMINATOR
-            //exit(0);
+            exit(0);
       }
       ;
 
-declaration_section: declaration_statement
+declaration_section : declaration_statement
                     | declaration_section declaration_statement 
                     ;
 
-declaration_statement: INTEGER_TYPE IDENTIFIER LINE_TERMINATOR { add_symbol_to_table($2, $1); }
+declaration_statement : INTEGER_TYPE IDENTIFIER LINE_TERMINATOR { add_symbol_to_table($2, $1); }
                       | FLOAT_TYPE IDENTIFIER LINE_TERMINATOR { add_symbol_to_table($2, $1); }
                       ;
 
-main_section: main_statement
+main_section : main_statement
              | main_section main_statement
              ;
 
-main_statement: move_assignment_statement
+main_statement : move_assignment_statement
                | add_assignment_statement
                | input_assignment_statement
                | print_statement
                ;
 
-move_assignment_statement: MOVE IDENTIFIER TO IDENTIFIER LINE_TERMINATOR { 
+move_assignment_statement : MOVE IDENTIFIER TO IDENTIFIER LINE_TERMINATOR { 
                                                                     int index_one = find_symbol_from_table($2);
                                                                     if (index_one == -1) {
                                                                         char str[100];
@@ -132,7 +136,7 @@ move_assignment_statement: MOVE IDENTIFIER TO IDENTIFIER LINE_TERMINATOR {
                                                             }
                           ;
 
-add_assignment_statement: ADD INTEGER TO IDENTIFIER LINE_TERMINATOR { 
+add_assignment_statement : ADD INTEGER TO IDENTIFIER LINE_TERMINATOR { 
                                                                     int index = find_symbol_from_table($4);
                                                                     if (index == -1) {
                                                                         char str[100];
@@ -205,7 +209,7 @@ add_assignment_statement: ADD INTEGER TO IDENTIFIER LINE_TERMINATOR {
                                                                     symbol_table[index].value = $2 + val;
                                                                 }
                          ;
-input_assignment_statement: INPUT IDENTIFIER LINE_TERMINATOR {
+input_assignment_statement : INPUT IDENTIFIER LINE_TERMINATOR {
                                                         int index_one = find_symbol_from_table($2);
                                                         if (index_one == -1) {
                                                             char str[100];
@@ -223,7 +227,7 @@ input_assignment_statement: INPUT IDENTIFIER LINE_TERMINATOR {
                                                                    }
                            ;
 
-identifier_list: IDENTIFIER SEMICOLON {
+identifier_list : IDENTIFIER SEMICOLON {
                                             int index_one = find_symbol_from_table($1);
                                             if (index_one == -1) {
                                                 char str[100];
@@ -241,16 +245,16 @@ identifier_list: IDENTIFIER SEMICOLON {
                                                         }
                 ;
 
-print_statement: PRINT print_element LINE_TERMINATOR
+print_statement : PRINT print_element LINE_TERMINATOR
                  | PRINT print_list
                  ;
 
-print_list: print_element SEMICOLON
+print_list : print_element SEMICOLON
            | print_list print_element SEMICOLON
            | print_list print_element LINE_TERMINATOR
            ;
 
-print_element: STRING_LITERAL
+print_element : STRING_LITERAL
               | IDENTIFIER {
                                 int index_one = find_symbol_from_table($1);
                                 if (index_one == -1) {
@@ -283,13 +287,31 @@ int find_symbol_from_table(char* name) {
 }
 
 void yyerror(const char *msg) {
-    //printf("Invalid Program!\n");
+    printf("Invalid Program!\n");
     fprintf(stderr, "Line %d: %s\n", yylineno, msg);
     exit(1);
 }
 
 int main(int argc, char** argv) {
-        do yyparse();
-        while(!feof(yyin));
-        return 0;
+  if (argc != 2) {
+    printf("Input file required");
+    return 1;
+  }
+
+  FILE* input_file = fopen(argv[1], "r");
+  if (!input_file) {
+    printf("Failed to open file %s\n", argv[1]);
+    return 1;
+  }
+
+  yyin = input_file;
+  int parseResult = yyparse();
+  if (parseResult == 0){
+    printf("Program is well formed!\n");
+  }else if (parseResult == 2){
+    printf("Program ran out of memory!\n");
+  }
+  
+  fclose(input_file);
+  return 0;
 }

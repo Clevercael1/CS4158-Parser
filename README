@@ -1,20 +1,20 @@
-To run the lexer enter the following bash commands:
-
-flex project.l 
-gcc -o lexer lex.yy.c
-.\lexer filename 
-
-I have included an example.in file in my submission (That contains a valid example). Feel free to use the below bash command to test my lexer.
-
-./lexer example.in
-
-example.in is completely valid, except for one variable named 94K, when run the lexer announces this variable as being Invalid.
-
 To run my parser, replace the text in the file text.BUCOL with your own BUCOL code. I have left working code in the file by default.
 
 Then navigate to the file location in a command prompt
-Then run the command : "sh build_and_run.sh"
+Then run the bash command : "sh build_and_run.sh"
 
-The above command executes a bash script that will compile and run the project. You will get a console based output from both the lexer and the parser.
+The above command executes a bash script that will compile and run the project. You will get a console based output from the parser.
 
-If you wish to change the file name of the BUCOL file, then navigate to the build_and_run.sh file and change "./executable.exe ./text.BUCOL" to ./executable.exe ./filenameHere.BUCOL
+If you wish to change the file name of the BUCOL file, then navigate to the build_and_run.sh file and change "./executable.exe ./text.BUCOL" to ./executable.exe ./filenameHere.BUCOL.
+
+If you wish to compile and run the project, then enter the below commands.
+
+flex project.l
+
+bison -d -g ./project.y
+
+gcc -c lex.yy.c project.tab.c
+
+gcc -o executable lex.yy.o project.tab.o
+
+./executable.exe ./text.BUCOL

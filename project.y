@@ -8,6 +8,8 @@ extern int yylex();
 extern int yylineno;
 extern FILE *yyin; 
 
+//COF 20272626
+
 #define MAX_SYMBOLS_SIZE 1000
 
 struct symbol {
@@ -268,7 +270,7 @@ input_assignment_statement: INPUT IDENTIFIER LINE_TERMINATOR {
                                                             yyerror(str);
                                                         }
                                                   }
-                          | INPUT identifier_list IDENTIFIER LINE_TERMINATOR {
+                          | INPUT list_of_identifiers IDENTIFIER LINE_TERMINATOR {
                                                                         int index_one = find_symbol_from_table($3);
                                                                         if (index_one == -1) {
                                                                             char str[100];
@@ -278,7 +280,7 @@ input_assignment_statement: INPUT IDENTIFIER LINE_TERMINATOR {
                                                                    }
                           ;
 
-identifier_list: IDENTIFIER SEMICOLON {
+list_of_identifiers: IDENTIFIER SEMICOLON {
                                             int index_one = find_symbol_from_table($1);
                                             if (index_one == -1) {
                                                 char str[100];
@@ -286,7 +288,7 @@ identifier_list: IDENTIFIER SEMICOLON {
                                                 yyerror(str);
                                             }
                                         }
-               | identifier_list IDENTIFIER SEMICOLON {
+               | list_of_identifiers IDENTIFIER SEMICOLON {
                                                             int index_one = find_symbol_from_table($2);
                                                             if (index_one == -1) {
                                                                 char str[100];
@@ -296,16 +298,16 @@ identifier_list: IDENTIFIER SEMICOLON {
                                                         }
                ;
 
-print_statement: PRINT print_element LINE_TERMINATOR
-               | PRINT print_list
+print_statement: PRINT print_individual_item LINE_TERMINATOR
+               | PRINT list_to_print
                ;
 
-print_list: print_element SEMICOLON
-          | print_list print_element SEMICOLON
-          | print_list print_element LINE_TERMINATOR
+list_to_print: print_individual_item SEMICOLON
+          | list_to_print print_individual_item SEMICOLON
+          | list_to_print print_individual_item LINE_TERMINATOR
           ;
 
-print_element: STRING_LITERAL
+print_individual_item: STRING_LITERAL
              | IDENTIFIER {
                                 int index_one = find_symbol_from_table($1);
                                 if (index_one == -1) {

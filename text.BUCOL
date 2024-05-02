@@ -6,7 +6,7 @@ SSS.SS K9.
 
 MAIN.
 PRINT "Please enter a number? ".
-INPUT -Y; XY-1.
+INPUT -Y; XY-1; Z.
 MOVE 155.55 TO -Y.
 MOVE -Y TO Z.
 ADD -Y TO Z.

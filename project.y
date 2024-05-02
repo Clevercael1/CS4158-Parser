@@ -1,4 +1,3 @@
-
 %{
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +8,7 @@ extern int yylex();
 extern int yylineno;
 extern FILE *yyin; 
 
-#define MAX_SYMBOLS_SIZE 100000
+#define MAX_SYMBOLS_SIZE 1000
 
 struct symbol {
     char name[100];
@@ -40,31 +39,26 @@ int find_symbol_from_table(char* name);
 
 %%
 
-bucol: START LINE_TERMINATOR
-      {
-            printf("Parsing complete\n");
-            //declaration_section MAIN LINE_TERMINATOR main_section END LINE_TERMINATOR
-            //exit(0);
-      }
-      ;
+bucol: START LINE_TERMINATOR declaration_section MAIN LINE_TERMINATOR main_section END LINE_TERMINATOR { printf("Parsing complete\n"); }
+     ;
 
 declaration_section: declaration_statement
-                    | declaration_section declaration_statement 
-                    ;
+                   | declaration_section declaration_statement 
+                   ;
 
 declaration_statement: INTEGER_TYPE IDENTIFIER LINE_TERMINATOR { add_symbol_to_table($2, $1); }
-                      | FLOAT_TYPE IDENTIFIER LINE_TERMINATOR { add_symbol_to_table($2, $1); }
-                      ;
+                     | FLOAT_TYPE IDENTIFIER LINE_TERMINATOR { add_symbol_to_table($2, $1); }
+                     ;
 
 main_section: main_statement
-             | main_section main_statement
-             ;
+            | main_section main_statement
+            ;
 
 main_statement: move_assignment_statement
-               | add_assignment_statement
-               | input_assignment_statement
-               | print_statement
-               ;
+              | add_assignment_statement
+              | input_assignment_statement
+              | print_statement
+              ;
 
 move_assignment_statement: MOVE IDENTIFIER TO IDENTIFIER LINE_TERMINATOR { 
                                                                     int index_one = find_symbol_from_table($2);
@@ -88,7 +82,7 @@ move_assignment_statement: MOVE IDENTIFIER TO IDENTIFIER LINE_TERMINATOR {
                                                                     }
                                                                     symbol_table[index_two].value = (int)$2;                                                                     
                                                                 }
-                          | MOVE INTEGER TO IDENTIFIER LINE_TERMINATOR { 
+                         | MOVE INTEGER TO IDENTIFIER LINE_TERMINATOR { 
                                                                 int index = find_symbol_from_table($4);
                                                                 if (index == -1) {
                                                                     char str[100];
@@ -109,7 +103,7 @@ move_assignment_statement: MOVE IDENTIFIER TO IDENTIFIER LINE_TERMINATOR {
                                                                 }
                                                                 symbol_table[index].value = $2; 
                                                             }
-                          | MOVE FLOAT TO IDENTIFIER LINE_TERMINATOR { 
+                         | MOVE FLOAT TO IDENTIFIER LINE_TERMINATOR { 
                                                                 int index = find_symbol_from_table($4);
                                                                 if (index == -1) {
                                                                     char str[100];
@@ -130,7 +124,7 @@ move_assignment_statement: MOVE IDENTIFIER TO IDENTIFIER LINE_TERMINATOR {
                                                                 }
                                                                 symbol_table[index].value = $2; 
                                                             }
-                          ;
+                         ;
 
 add_assignment_statement: ADD INTEGER TO IDENTIFIER LINE_TERMINATOR { 
                                                                     int index = find_symbol_from_table($4);
@@ -153,7 +147,7 @@ add_assignment_statement: ADD INTEGER TO IDENTIFIER LINE_TERMINATOR {
                                                                     }
                                                                     symbol_table[index].value = $2 + val;
                                                                 }
-                         | ADD IDENTIFIER TO IDENTIFIER LINE_TERMINATOR { 
+                        | ADD IDENTIFIER TO IDENTIFIER LINE_TERMINATOR { 
                                                                     int index_one = find_symbol_from_table($2);
                                                                     if (index_one == -1) {
                                                                         char str[100];
@@ -183,7 +177,7 @@ add_assignment_statement: ADD INTEGER TO IDENTIFIER LINE_TERMINATOR {
                                                                     }
                                                                     symbol_table[index_two].value = val1 + val2;
                                                                 }
-                         | ADD FLOAT TO IDENTIFIER LINE_TERMINATOR { 
+                        | ADD FLOAT TO IDENTIFIER LINE_TERMINATOR { 
                                                                     int index = find_symbol_from_table($4);
                                                                     if (index == -1) {
                                                                         char str[100];
@@ -204,7 +198,8 @@ add_assignment_statement: ADD INTEGER TO IDENTIFIER LINE_TERMINATOR {
                                                                     }
                                                                     symbol_table[index].value = $2 + val;
                                                                 }
-                         ;
+                        ;
+
 input_assignment_statement: INPUT IDENTIFIER LINE_TERMINATOR {
                                                         int index_one = find_symbol_from_table($2);
                                                         if (index_one == -1) {
@@ -213,7 +208,7 @@ input_assignment_statement: INPUT IDENTIFIER LINE_TERMINATOR {
                                                             yyerror(str);
                                                         }
                                                   }
-                           | INPUT identifier_list IDENTIFIER LINE_TERMINATOR {
+                          | INPUT identifier_list IDENTIFIER LINE_TERMINATOR {
                                                                         int index_one = find_symbol_from_table($3);
                                                                         if (index_one == -1) {
                                                                             char str[100];
@@ -221,7 +216,7 @@ input_assignment_statement: INPUT IDENTIFIER LINE_TERMINATOR {
                                                                             yyerror(str);
                                                                         }
                                                                    }
-                           ;
+                          ;
 
 identifier_list: IDENTIFIER SEMICOLON {
                                             int index_one = find_symbol_from_table($1);
@@ -231,7 +226,7 @@ identifier_list: IDENTIFIER SEMICOLON {
                                                 yyerror(str);
                                             }
                                         }
-                | identifier_list IDENTIFIER SEMICOLON {
+               | identifier_list IDENTIFIER SEMICOLON {
                                                             int index_one = find_symbol_from_table($2);
                                                             if (index_one == -1) {
                                                                 char str[100];
@@ -239,19 +234,19 @@ identifier_list: IDENTIFIER SEMICOLON {
                                                                 yyerror(str);
                                                             }
                                                         }
-                ;
+               ;
 
 print_statement: PRINT print_element LINE_TERMINATOR
-                 | PRINT print_list
-                 ;
+               | PRINT print_list
+               ;
 
 print_list: print_element SEMICOLON
-           | print_list print_element SEMICOLON
-           | print_list print_element LINE_TERMINATOR
-           ;
+          | print_list print_element SEMICOLON
+          | print_list print_element LINE_TERMINATOR
+          ;
 
 print_element: STRING_LITERAL
-              | IDENTIFIER {
+             | IDENTIFIER {
                                 int index_one = find_symbol_from_table($1);
                                 if (index_one == -1) {
                                     char str[100];
@@ -259,7 +254,7 @@ print_element: STRING_LITERAL
                                     yyerror(str);
                                 }
                             }
-              ;
+             ;
 %%
 
 void add_symbol_to_table(char* name, char* size) {
@@ -283,13 +278,29 @@ int find_symbol_from_table(char* name) {
 }
 
 void yyerror(const char *msg) {
-    //printf("Invalid Program!\n");
+    printf("Invalid BUCOL Code!\n");
     fprintf(stderr, "Line %d: %s\n", yylineno, msg);
     exit(1);
 }
 
 int main(int argc, char** argv) {
-        do yyparse();
-        while(!feof(yyin));
-        return 0;
+  if (argc != 2) {
+    printf("Please specify an input file");
+    return 1;
+  }
+
+  FILE* inputf = fopen(argv[1], "r");
+  if (!inputf) {
+    printf("Failed to open file %s\n", argv[1]);
+    return 1;
+  }
+
+  yyin = inputf;
+  int parseResult = yyparse();
+  if (parseResult == 0){
+    printf("BUCOL code is well formed!\n");
+  }
+  
+  fclose(inputf);
+  return 0;
 }

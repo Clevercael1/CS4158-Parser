@@ -43,9 +43,9 @@ INPUT                                                       { return INPUT;}
 PRINT                                                       { return PRINT;}
 TO                                                          { return TO;}
 
-s+                                                          { return INTEGER_TYPE;}
-(s+\.\s+)                                                   { return FLOAT_TYPE;}
-[a-zA-Z][a-zA-Z0-9-]*|[-][a-zA-Z][a-zA-Z0-9-]*              { return IDENTIFIER;}
+s+                                                          { yylval.sval = strdup(yytext); return INTEGER_TYPE;}
+(s+\.\s+)                                                   { yylval.sval = strdup(yytext); return FLOAT_TYPE;}
+[a-zA-Z][a-zA-Z0-9-]*|[-][a-zA-Z][a-zA-Z0-9-]*              { yylval.sval = strdup(yytext); return IDENTIFIER;}
 \"(\\.|[^\"])*\"                                            { return STRING_LITERAL;}
 [\.]					                                    { return LINE_TERMINATOR; }
 \;					                                        { return SEMICOLON;}
